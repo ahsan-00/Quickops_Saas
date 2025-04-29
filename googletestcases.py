@@ -1,96 +1,93 @@
-import time
-import pyautogui # type: ignore
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import time
 
-# Chrome setup
-options = webdriver.ChromeOptions()
-options.add_argument("--start-maximized")
-options.add_experimental_option("detach", True)  # Keeps the browser open for debugging if crash happens
+# Test Data
+VALID_EMAIL = "sanjida.afrin@anwargroup.com"
+VALID_PASSWORD = "Hello3963"
+INVALID_EMAIL = "invaliduser@example.com"
+INVALID_PASSWORD = "WrongPassword123"
 
-driver = webdriver.Chrome(options=options)
-wait = WebDriverWait(driver, 30)
-
-try:
-    # Step 1: Go to Gmail
-    driver.get("https://mail.google.com/")
-    print(" Opening Gmail login...")
-
-    # Step 2: Enter Email
-    wait.until(EC.presence_of_element_located((By.ID, "identifierId"))).send_keys("sanjida.afrin@anwargroup.com" + Keys.ENTER)
-    print(" Email entered.")
-
-    # Step 3: Enter Password
-    password_input = wait.until(EC.presence_of_element_located((By.NAME, "Passwd")))
-    password_input.send_keys("Hello3963" + Keys.ENTER)
-    print(" Password entered.")
-
-    # Step 4: Wait for Inbox to Load
-    wait.until(EC.presence_of_element_located((By.XPATH, "//div[text()='Compose']")))
-    print(" Logged in and inbox loaded.")
-
-    time.sleep(5)  # wait for the prompt to appear
+def google_login(email, password):
+    driver = webdriver.Chrome()
+    driver.get("https://qa.quickops.io/auth/login")
+    driver.maximize_window()
 
     try:
-        pyautogui.press('tab')
-        pyautogui.press('tab')
-        pyautogui.press('enter')
-        pyautogui.press('tab')
-        pyautogui.press('enter')
-        print(" Simulated keyboard input.")
+        google_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//div[contains(text(),'Continue with Google')]"))
+        )
+        google_button.click()
+        print("Clicked 'Continue with Google' button.")
     except Exception as e:
-        print("Failed to simulate keyboard input:", e)
+        print("Could not click the Google login button:", e)
+        driver.quit()
+        return False
 
-    # Step 4.1: Check for "Google permission popup" prompt
-    # try:
-    #     gpopup_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Allow')]")))
-    #     gpopup_btn.click()
-    #     print(" 'Allow' button clicked.")
-    # except:
-    #     print("ℹ 'Allow' button not shown, continuing...")
+   
+    time.sleep(3)
+    windows = driver.window_handles
+    driver.switch_to.window(windows[-1])
 
-    # Step 5: Click "No thanks" if it appears
+
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "identifierId"))
+    ).send_keys(email)
+    driver.find_element(By.XPATH, "//span[text()='Next']").click()
+
+    time.sleep(3)
+    page_source = driver.page_source
+    if "Couldn't find your Google Account" in page_source:
+        print("Invalid Email Address Detected!")
+        driver.quit()
+        return False
+
+
     try:
-        no_thanks_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "(//button[normalize-space()='No thanks'])[1]")))
-        no_thanks_btn.click()
-        print(" 'No thanks' clicked.")
-    except:
-        print("ℹ 'No thanks' not shown, continuing...")
-
-    # Step 6: Open Spam Folder
-    print(" Clicking 'More' to find Spam folder...")
-    wait.until(EC.element_to_be_clickable((By.XPATH, "//span[text()='More']"))).click()
-
-    print(" Clicking on Spam folder...")
-    wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '#spam')]"))).click()
-
-    # Step 7: Wait for Spam Folder to Load
-    wait.until(EC.presence_of_element_located((By.XPATH, "//div[text()='Spam']")))
-    print(" Spam folder opened.")
-    time.sleep(4)  # Let emails render properly
-
-    # Step 8: Search for the Mail
-    print(" Searching for mail by subject...")
-    search_box = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Search mail']")))
-    search_box.clear()
-    search_box.send_keys('subject:"Verify your Email address for QuickOps account" in:spam' + Keys.ENTER)
-
-    # Step 9: Wait for Email Result and Open
-    print(" Waiting for email to appear...")
-    try:
-        email_subject = wait.until(EC.element_to_be_clickable((By.XPATH, "//span/b[contains(text(),'Verify your Email address for QuickOps account')]")))
-        email_subject.click()
-        print(" Email opened successfully.")
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "Passwd"))
+        ).send_keys(password)
+        driver.find_element(By.XPATH, "//span[text()='Next']").click()
     except Exception as e:
-        print(" Email not found or failed to open:", e)
+        print("Password field not found. Possible invalid email flow.")
+        driver.quit()
+        return False
 
+
+    time.sleep(3)
+    page_source = driver.page_source
+    if "Wrong password" in page_source:
+        print("Invalid Password Detected!")
+        driver.quit()
+        return False
+
+  
     time.sleep(10)
+    driver.switch_to.window(windows[0])
+    time.sleep(5)
 
-except Exception as e:
-    print(" General Error:", e)
 
-finally:
-    driver.quit()
+    if driver.current_url == "https://qa.quickops.io/dashboard":
+        print("Successfully logged in and reached Dashboard!")
+        driver.quit()
+        return True
+    else:
+        print("Login failed. Current URL:", driver.current_url)
+        driver.quit()
+        return False
+
+# Test Cases 
+
+print("\n Test Case 1: Login with Valid Email and Valid Password ")
+result = google_login(VALID_EMAIL, VALID_PASSWORD)
+print("Test Result:", "Passed" if result else "Failed")
+
+print("\n Test Case 2: Login with Invalid Email ")
+result = google_login(INVALID_EMAIL, VALID_PASSWORD)
+print("Test Result:", "Passed" if not result else "Failed")
+
+print("\n Test Case 3: Login with Invalid Password ")
+result = google_login(VALID_EMAIL, INVALID_PASSWORD)
+print("Test Result:", "Passed" if not result else "Failed")
