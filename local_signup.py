@@ -1,5 +1,5 @@
 import time
-import pyautogui # type: ignore
+import pyautogui
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -38,19 +38,16 @@ try:
         pyautogui.press('tab')
         pyautogui.press('tab')
         pyautogui.press('enter')
-        pyautogui.press('tab')
-        pyautogui.press('enter')
-        print(" Simulated keyboard input.")
     except Exception as e:
         print("Failed to simulate keyboard input:", e)
 
     # Step 4.1: Check for "Google permission popup" prompt
-    # try:
-    #     gpopup_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Allow')]")))
-    #     gpopup_btn.click()
-    #     print(" 'Allow' button clicked.")
-    # except:
-    #     print("ℹ 'Allow' button not shown, continuing...")
+    try:
+        gpopup_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Allow')]")))
+        gpopup_btn.click()
+        print(" 'Allow' button clicked.")
+    except:
+        print("ℹ 'Allow' button not shown, continuing...")
 
     # Step 5: Click "No thanks" if it appears
     try:
