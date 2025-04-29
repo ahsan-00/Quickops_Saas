@@ -75,3 +75,5 @@ print("Test Result:", "Passed" if not result else "Failed")
 print("\nTest Case 3: Login with Invalid Password")
 result = github_login(VALID_EMAIL, INVALID_PASSWORD)
 print("Test Result:", "Passed" if not result else "Failed")
+#Sanjida Afrin
+# 2023-10-05    
