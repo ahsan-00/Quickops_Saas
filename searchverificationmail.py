@@ -18,18 +18,18 @@ wait = WebDriverWait(driver, 30)
 try:
     #  Open Gmail
     driver.get("https://mail.google.com/")
-    print("📨 Opening Gmail...")
+    print(" Opening Gmail...")
 
     #  Login
     wait.until(EC.presence_of_element_located((By.ID, "identifierId"))).send_keys("sanjida.afrin@anwargroup.com", Keys.ENTER)
-    print("✅ Email entered.")
+    print(" Email entered.")
 
     wait.until(EC.presence_of_element_located((By.NAME, "Passwd"))).send_keys("Hello3963", Keys.ENTER)
-    print("✅ Password entered.")
+    print(" Password entered.")
 
 
     wait.until(EC.presence_of_element_located((By.XPATH, "//div[text()='Compose']")))
-    print("📥 Inbox loaded.")
+    print(" Inbox loaded.")
 
     
     time.sleep(5)
@@ -39,33 +39,33 @@ try:
         pyautogui.press('enter')
         pyautogui.press('tab')
         pyautogui.press('enter')
-        print("🧩 Simulated keyboard input.")
+        print(" Simulated keyboard input.")
     except Exception as e:
-        print("⚠️ Keyboard input failed:", e)
+        print(" Keyboard input failed:", e)
 
     try:
         no_thanks_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='No thanks']")))
         no_thanks_btn.click()
-        print("🛑 'No thanks' clicked.")
+        print(" 'No thanks' clicked.")
     except:
-        print("✅ 'No thanks' button not shown.")
+        print(" 'No thanks' button not shown.")
 
     #  Open Spam folder
     wait.until(EC.element_to_be_clickable((By.XPATH, "//span[text()='More']"))).click()
     time.sleep(2)
     wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '#spam')]"))).click()
-    print("📁 Spam folder opened.")
+    print(" Spam folder opened.")
     wait.until(EC.presence_of_element_located((By.XPATH, "//div[contains(text(),'Spam')]")))
 
     # Search  Spam
     search_box = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Search mail']")))
     search_box.clear()
     search_box.send_keys('subject:"Verify your Email address for QuickOps account" in:spam', Keys.ENTER)
-    print("🔍 Search executed.")
+    print(" Search executed.")
 
     # Open the email
     try:
-        print("📨 Looking for the email...")
+        print(" Looking for the email...")
         email_subject = wait.until(EC.element_to_be_clickable(
             (By.XPATH, "//span/b[contains(text(),'Verify your Email address for QuickOps account')]")
         ))
@@ -77,19 +77,19 @@ try:
             ))
             email_subject.click()
         except Exception as e:
-            print("❌ Email not found or click failed:", e)
+            print(" Email not found or click failed:", e)
             raise
 
-    print("✅ Email opened.")
+    print(" Email opened.")
 
     #  Click the verification link
     try:
-        print("🔗 Looking for the verification link...")
+        print(" Looking for the verification link...")
         verification_link = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, 'quickops')]")))
         verification_link.click()
-        print("✅ Verification link clicked.")
+        print(" Verification link clicked.")
     except Exception as e:
-        print("❌ Could not find or click the verification link:", e)
+        print(" Could not find or click the verification link:", e)
         raise
 
 finally:
